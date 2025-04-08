@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rocket.rocket.mapper.BookMapper">
+
+    <resultMap id="bookResultMap" type="com.rocket.rocket.model.Book">
+        <id property="id" column="id"/>
+        <result property="titulo" column="titulo"/>
+        <result property="autor" column="autor"/>
+        <result property="fechaRegistro" column="fecha_registro"/>
+        <result property="stock" column="stock"/>
+        <result property="editorial" column="editorial"/>
+        <result property="disponible" column="disponible"/>
+    </resultMap>
+
+    <select id="findById" resultMap="bookResultMap">
+        SELECT * FROM LIBROS WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="bookResultMap">
+        SELECT * FROM LIBROS
+    </select>
+
+    <select id="findByTitle" resultMap="bookResultMap">
+        SELECT * FROM LIBROS
+        WHERE UPPER(titulo) LIKE UPPER('%' || #{titulo} || '%')
+        ORDER BY titulo
+    </select>
+
+    <select id="findByAuthor" resultMap="bookResultMap">
+        SELECT * FROM LIBROS
+        WHERE UPPER(autor) LIKE UPPER('%' || #{autor} || '%')
+        ORDER BY autor, titulo
+    </select>
+
+    <select id="findByAvailability" resultMap="bookResultMap">
+        SELECT * FROM LIBROS
+        WHERE disponible = #{disponible}
+        ORDER BY titulo
+    </select>
+
+    <insert id="insertBook" useGeneratedKeys="true" keyProperty="id" keyColumn="ID">
+        INSERT INTO LIBROS (titulo, autor, fecha_registro, stock, editorial, disponible)
+        VALUES (#{titulo}, #{autor}, SYSDATE, #{stock}, #{editorial}, #{disponible})
+    </insert>
+
+    <update id="updateBook">
+        UPDATE LIBROS SET
+                          titulo = #{titulo},
+                          autor = #{autor},
+                          stock = #{stock},
+                          editorial = #{editorial},
+                          disponible = #{disponible}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateAvailability">
+        UPDATE LIBROS SET
+            disponible = #{disponible}
+        WHERE id = #{id}
+    </update>
+    <update id="addStock">
+        UPDATE LIBROS
+        SET stock = stock + #{amount}
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteBook">
+        DELETE FROM LIBROS WHERE id = #{id}
+    </delete>
+
+</mapper>

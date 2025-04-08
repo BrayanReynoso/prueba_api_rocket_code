@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rocket.rocket.mapper.LoanMapper">
+
+    <!-- ResultMap básico para el Loan -->
+    <resultMap id="loanResultMap" type="com.rocket.rocket.model.Loan">
+        <id property="id" column="id"/>
+        <result property="usuarioId" column="usuario_id"/>
+        <result property="libroId" column="libro_id"/>
+        <result property="fechaPrestamo" column="fecha_prestamo"/>
+        <result property="fechaDevolucion" column="fecha_devolucion"/>
+        <result property="estado" column="estado"/>
+    </resultMap>
+
+    <resultMap id="loanWithDetailsResultMap" type="com.rocket.rocket.model.Loan" extends="loanResultMap">
+        <association property="usuario" javaType="com.rocket.rocket.model.Student">
+            <id property="id" column="student_id"/>
+            <result property="nombre" column="student_nombre"/>
+            <result property="apellidos" column="student_apellidos"/>
+            <result property="email" column="student_email"/>
+        </association>
+        <association property="libro" javaType="com.rocket.rocket.model.Book">
+            <id property="id" column="book_id"/>
+            <result property="titulo" column="book_titulo"/>
+            <result property="autor" column="book_autor"/>
+            <result property="editorial" column="book_editorial"/>
+        </association>
+    </resultMap>
+
+    <!-- SQL básico para columnas -->
+    <sql id="Base_Column_List">
+        id, usuario_id, libro_id, fecha_prestamo, fecha_devolucion, estado
+    </sql>
+
+    <!-- SQL para joins con tablas relacionadas -->
+    <sql id="Join_Column_List">
+        p.id, p.usuario_id, p.libro_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+        u.id as student_id, u.nombre as student_nombre, u.email as student_email,
+        l.id as book_id, l.titulo as book_titulo, l.autor as book_autor, l.editorial as book_editorial
+    </sql>
+
+    <!-- Consultas básicas -->
+    <select id="findById" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE ID = #{id}
+    </select>
+
+    <select id="findByUsuarioId" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE USUARIO_ID = #{usuarioId}
+        ORDER BY fecha_prestamo DESC
+    </select>
+
+    <select id="findByLibroId" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE LIBRO_ID = #{libroId}
+        ORDER BY fecha_prestamo DESC
+    </select>
+
+    <select id="findAll" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        ORDER BY fecha_prestamo DESC
+    </select>
+
+    <!-- Consultas avanzadas -->
+    <select id="findActiveLoans" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE estado = 'ACTIVO'
+        ORDER BY fecha_devolucion ASC
+    </select>
+
+    <select id="findOverdueLoans" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE estado = 'ACTIVO'
+        AND fecha_devolucion
+                               ORDER BY fecha_devolucion ASC
+    </select>
+
+    <select id="findLoansByEstado" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE estado = #{estado}
+        ORDER BY fecha_prestamo DESC
+    </select>
+
+    <select id="findLoansByDateRange" resultMap="loanResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM PRESTAMOS
+        WHERE fecha_prestamo BETWEEN #{fechaInicio} AND #{fechaFin}
+        ORDER BY fecha_prestamo DESC
+    </select>
+
+    <select id="findByIdWithDetails" resultMap="loanWithDetailsResultMap">
+        SELECT
+            p.id, p.usuario_id, p.libro_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+            u.id AS student_id, u.nombre AS student_nombre, u.apellidos AS student_apellidos, u.email AS student_email,
+            l.id AS book_id, l.titulo AS book_titulo, l.autor AS book_autor, l.editorial AS book_editorial
+        FROM PRESTAMOS p
+                 JOIN USUARIOS u ON p.usuario_id = u.id
+                 JOIN LIBROS l ON p.libro_id = l.id
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="findAllWithDetails" resultMap="loanWithDetailsResultMap">
+        SELECT
+            p.id, p.usuario_id, p.libro_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+            u.id AS student_id, u.nombre AS student_nombre, u.apellidos AS student_apellidos, u.email AS student_email,
+            l.id AS book_id, l.titulo AS book_titulo, l.autor AS book_autor, l.editorial AS book_editorial
+        FROM PRESTAMOS p
+                 JOIN USUARIOS u ON p.usuario_id = u.id
+                 JOIN LIBROS l ON p.libro_id = l.id
+        ORDER BY p.fecha_prestamo DESC
+    </select>
+
+    <select id="findByUsuarioIdWithDetails" resultMap="loanWithDetailsResultMap">
+        SELECT
+            p.id, p.usuario_id, p.libro_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+            u.id AS student_id, u.nombre AS student_nombre, u.apellidos AS student_apellidos, u.email AS student_email,
+            l.id AS book_id, l.titulo AS book_titulo, l.autor AS book_autor, l.editorial AS book_editorial
+        FROM PRESTAMOS p
+                 JOIN USUARIOS u ON p.usuario_id = u.id
+                 JOIN LIBROS l ON p.libro_id = l.id
+        WHERE p.usuario_id = #{usuarioId}
+        ORDER BY p.fecha_prestamo DESC
+    </select>
+
+    <!-- Verificar disponibilidad de libro -->
+    <select id="countActiveLoansForBook" resultType="int">
+        SELECT COUNT(*)
+        FROM PRESTAMOS
+        WHERE libro_id = #{libroId}
+          AND estado = 'ACTIVO'
+    </select>
+
+    <insert id="insertLoan">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="BEFORE">
+            SELECT NVL(MAX(ID), 0) + 1 FROM PRESTAMOS
+        </selectKey>
+        INSERT INTO PRESTAMOS (ID, USUARIO_ID, LIBRO_ID, FECHA_PRESTAMO, FECHA_DEVOLUCION, ESTADO)
+        VALUES (#{id}, #{usuarioId}, #{libroId},
+        #{fechaPrestamo, jdbcType=DATE},
+        #{fechaDevolucion, jdbcType=DATE},
+        #{estado, jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateLoan">
+        UPDATE PRESTAMOS
+        SET FECHA_DEVOLUCION = #{fechaDevolucion, jdbcType=DATE},
+            ESTADO = #{estado, jdbcType=VARCHAR}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateEstado">
+        UPDATE PRESTAMOS
+        SET ESTADO = #{estado, jdbcType=VARCHAR}
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateFechaDevolucion">
+        UPDATE PRESTAMOS
+        SET FECHA_DEVOLUCION = #{fechaDevolucion, jdbcType=DATE}
+        WHERE ID = #{id}
+    </update>
+
+    <delete id="deleteLoan">
+        DELETE FROM PRESTAMOS WHERE ID = #{id}
+    </delete>
+
+    <select id="countActiveLoansByStudentId" resultType="int">
+        SELECT COUNT(*) FROM PRESTAMOS
+        WHERE usuario_id = #{studentId}
+          AND estado = 'ACTIVO'
+    </select>
+
+    <select id="findByStudentNameWithDetails" resultMap="loanWithDetailsResultMap">
+        SELECT <include refid="Join_Column_List" />
+        FROM PRESTAMOS p
+        JOIN USUARIOS u ON p.usuario_id = u.id
+        JOIN LIBROS l ON p.libro_id = l.id
+        WHERE LOWER(u.nombre) LIKE CONCAT('%', LOWER(#{nombre}), '%')
+        OR LOWER(u.apellidos) LIKE CONCAT('%', LOWER(#{nombre}), '%')
+        ORDER BY p.fecha_prestamo DESC
+    </select>
+</mapper>

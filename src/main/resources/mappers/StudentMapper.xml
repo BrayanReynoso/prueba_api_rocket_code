@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.rocket.rocket.mapper.StudentMapper">
+
+    <resultMap id="studentResultMap" type="com.rocket.rocket.model.Student">
+        <id property="id" column="ID"/>
+        <result property="nombre" column="NOMBRE"/>
+        <result property="apellidos" column="APELLIDOS"/>
+        <result property="telefono" column="TELEFONO"/>
+        <result property="email" column="EMAIL"/>
+        <result property="matricula" column="MATRICULA"/>
+    </resultMap>
+
+    <!-- Consulta para obtener un usuario por ID -->
+    <select id="findById" resultMap="studentResultMap">
+        SELECT * FROM USUARIOS WHERE ID = #{id}
+    </select>
+
+    <!-- Consulta para obtener todos los usuarios -->
+    <select id="findAll" resultMap="studentResultMap">
+        SELECT * FROM USUARIOS ORDER BY ID
+    </select>
+
+    <!-- Consulta para obtener un usuario por email -->
+    <select id="findByEmail" resultMap="studentResultMap">
+        SELECT * FROM USUARIOS WHERE EMAIL = #{email}
+    </select>
+    <select id="findByEmailLike" resultMap="studentResultMap">
+        SELECT *
+        FROM USUARIOS
+        WHERE LOWER(EMAIL) LIKE CONCAT('%', LOWER(#{email}), '%')
+    </select>
+    <!-- Insertar un nuevo usuario -->
+    <insert id="insertStudent" statementType="CALLABLE">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT NVL(MAX(ID), 0) + 1 FROM USUARIOS
+        </selectKey>
+        INSERT INTO USUARIOS (
+        ID, NOMBRE, APELLIDOS, TELEFONO, EMAIL, MATRICULA
+        ) VALUES (
+        #{id}, #{nombre}, #{apellidos}, #{telefono}, #{email}, #{matricula}
+        )
+    </insert>
+
+    <!-- Actualizar un usuario -->
+    <update id="updateStudent">
+        UPDATE USUARIOS
+        SET
+            NOMBRE = #{nombre},
+            APELLIDOS = #{apellidos},
+            TELEFONO = #{telefono},
+            EMAIL = #{email},
+            MATRICULA = #{matricula}
+        WHERE ID = #{id}
+    </update>
+
+    <!-- Eliminar un usuario -->
+    <delete id="deleteStudent">
+        DELETE FROM USUARIOS WHERE ID = #{id}
+    </delete>
+
+    <!-- Consulta para obtener un usuario por matrícula -->
+    <select id="findByMatricula" resultMap="studentResultMap">
+        SELECT * FROM USUARIOS WHERE MATRICULA = #{matricula} AND ROWNUM = 1
+    </select>
+
+</mapper>

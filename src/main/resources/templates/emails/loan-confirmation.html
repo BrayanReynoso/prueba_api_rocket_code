@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmación de Préstamo de Libro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #003366;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+        .book-info {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+        .info {
+            margin-bottom: 10px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .warning {
+            color: #cc0000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Prueba | Rocket Code</h1>
+        <h2>Confirmación de Préstamo</h2>
+    </div>
+
+    <div class="content">
+        <p>Estimado/a <strong th:text="${student.nombre}">Usuario</strong>,</p>
+
+        <p>¡Gracias por utilizar el servicio de biblioteca! Te confirmamos que has solicitado el siguiente préstamo:</p>
+
+        <div class="book-info">
+            <h3 th:text="${book.titulo}">Título del Libro</h3>
+            <div class="info"><strong>Autor:</strong> <span th:text="${book.autor}">Autor</span></div>
+            <div class="info"><strong>Editorial:</strong> <span th:text="${book.editorial}">Editorial</span></div>
+            <div class="info"><strong>Fecha de préstamo:</strong> <span th:text="${fechaPrestamo}">01/01/2023</span></div>
+            <div class="info"><strong>Fecha de devolución:</strong> <span th:text="${fechaDevolucion}">15/01/2023</span></div>
+        </div>
+
+        <p>Por favor, asegúrate de devolver el libro en la fecha indicada para evitar recargos y sanciones.</p>
+
+        <p class="warning">Recuerda: El libro debe ser devuelto en buen estado y antes de la fecha de vencimiento.</p>
+
+    </div>
+
+    <div class="footer">
+        <p>Este correo ha sido enviado automáticamente, por favor no responder a esta dirección.</p>
+    </div>
+</div>
+</body>
+</html>
