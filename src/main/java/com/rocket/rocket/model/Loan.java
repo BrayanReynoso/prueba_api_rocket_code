@@ -21,19 +21,4 @@ public class Loan {
     private Student usuario;   // Relación con el usuario que hace el préstamo
     private Book libro;        // Relación con el libro prestado
 
-    // Método para verificar si un préstamo está vencido
-    public boolean isVencido() {
-        if (fechaDevolucion == null) {
-            return false; // Sin fecha de devolución definida
-        }
-        return LocalDate.now().isAfter(fechaDevolucion) && !"DEVUELTO".equals(estado);
-    }
-
-    // Método para calcular días restantes
-    public long diasRestantes() {
-        if (fechaDevolucion == null) {
-            return 0;
-        }
-        return java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), fechaDevolucion);
-    }
 }
